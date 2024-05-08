@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -10,4 +15,45 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+.bg_image{
+  background-image: url("https://img.freepik.com/free-vector/tiny-people-searching-business-opportunities_74855-19928.jpg?w=996&t=st=1712382650~exp=1712383250~hmac=1519251dc96ec6aa02ea8c30dbf1dd9fb8b64157563c74cdfc4082d278a4b3c7");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.2;
+  
+}
+.bg_image_signup{
+  background-image: url("https://img.freepik.com/free-vector/recruit-agent-analyzing-candidates_74855-4565.jpg?size=626&ext=jpg&ga=GA1.1.1879900221.1696061664&semt=sph");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.2;
+}
+.bg_image_contact{
+  background-image: url("https://img.freepik.com/free-vector/tiny-people-searching-business-opportunities_74855-19928.jpg?w=1060&t=st=1713940125~exp=1713940725~hmac=7859cd339a9af67f99a3c3f0aa7026524a8fbd521112f7de11cff93f82e7abcf");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.2;
+}
+.label-style {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333; /* Adjust color as needed */
+}
+
+.form-style {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc; /* Border color */
+  border-radius: 4px;
+  font-size: 14px;
+  color: #555; /* Text color */
+}
+
+.form-style:focus {
+  outline: none;
+  border-color: #007bff; /* Border color when focused */
 }
