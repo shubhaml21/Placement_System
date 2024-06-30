@@ -1,28 +1,32 @@
-import IconBtn from "./IconBtn"
+import React from 'react';
 
-export default function ConfirmationModal({ modalData }) {
+const LogoutModal = ({ isOpen, onClose, isLogout }) => {
+  if (!isOpen) return null; // Render nothing if isOpen is false
+
   return (
-    <div className="fixed inset-0 z-[1000] !mt-0 grid place-items-center overflow-auto bg-white bg-opacity-10 backdrop-blur-sm">
-      <div className="w-11/12 max-w-[350px] rounded-lg border border-richblack-400  bg-[#F9F9F9B2] p-6">
-        <p className="text-2xl font-semibold text-richblack-5">
-          {modalData?.text1}
-        </p>
-        <p className="mt-3 mb-5 leading-6 text-richblack-200">
-          {modalData?.text2}
-        </p>
-        <div className="flex items-center gap-x-4">
-          <IconBtn
-            onclick={modalData?.btn1Handler}
-            text={modalData?.btn1Text}
-          />
+    <div className="fixed inset-0 z-[9999]flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-card w-full max-w-md p-6 rounded-lg shadow-lg">
+        <div className="text-center">
+          <h2 className="text-lg font-bold text-primary mb-2">Logout</h2>
+          <p className="text-sm text-muted-foreground">Are you sure you want to logout?</p>
+        </div>
+        <div className="flex justify-center mt-6 space-x-4">
           <button
-            className="cursor-pointer rounded-md  py-[8px] px-[20px] font-semibold text-richblack-900"
-            onClick={modalData?.btn2Handler}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/80 px-4 py-2 rounded-md"
+            onClick={isLogout}
           >
-            {modalData?.btn2Text}
+            Logout
+          </button>
+          <button
+            className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-md"
+            onClick={onClose}
+          >
+            Cancel
           </button>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default LogoutModal;

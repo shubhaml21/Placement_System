@@ -58,7 +58,7 @@ exports.signup = async (req, res) => {
       password: hashedPassword,
       image: "",
     });
-      console.log("user created",user);
+      // console.log("user created",user);
     return res.status(200).json({
       success: true,
       user,

@@ -29,11 +29,7 @@ const userSchema = new mongoose.Schema(
 			required: true,
 		},
 		// Define the role field with type String and enum values of "Admin", "Student", or "Visitor"
-		accountType: {
-			type: String,
-		enum: ["Admin", "Student",],
-			// required: true,
-		},
+
 		active: {
 			type: Boolean,
 			default: true,
@@ -44,10 +40,14 @@ const userSchema = new mongoose.Schema(
 		},
 		additionalDetails: {
 			type: mongoose.Schema.Types.ObjectId,
-			required: true,
+			// required: true,
 			ref: "userDetails",
 		},
-		
+		role:{
+			type: String,
+			enum: ["Admin", "User"],
+			default: "User",
+		},
 		token: {
 			type: String,
 		},
@@ -57,9 +57,18 @@ const userSchema = new mongoose.Schema(
 		image: {
 			type: String,
 			// required: true,
-		},
+		}, appliedPositions: [
+			{
+			  type: mongoose.Schema.Types.ObjectId,
+			  ref: "Application",
+			}],
+		appliedCompanies: [{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Company"
+		  }]
+		,
+		// Add timestamps for when the document is created and last modified 
 		
-		// Add timestamps for when the document is created and last modified
 	},
 	{ timestamps: true }
 );

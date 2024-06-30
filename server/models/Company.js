@@ -12,6 +12,10 @@ const companySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  companyType:{
+    type:String,
+    required:true,
+  },
   companyLogo: {
     type: String,
     // required: true
@@ -21,22 +25,30 @@ const companySchema = new mongoose.Schema({
     // required: true
   },
   arrival_date: {
-    type: Date,
+    type: String,
     required: true,
   },
-  package: {
+  packageAmount: {
     type: Number,
     required: true,
   },
   eligibility: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
+    // required: true,
     ref: "Companyeligibilty",
   },
   year: {
     type: Number,
     required: true,
-  },
+  }, 
+  positions:[{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"Position",
+  }],
+  appliedStudents: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  }]
 });
 
 // Export the Mongoose model for the user schema, using the name "user"

@@ -1,18 +1,32 @@
 import { BsArrowRight } from "react-icons/bs";
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import axios from "axios";
 import { NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsAuth, setToken, setUser } from "../slices/authSlice";
+import Logo_placement from "../Assets/Logo_placement.png";
+import SplashScreen from "./SplashScreen";
+
 
 export default function Login() {
   const { token } = useSelector((state) => state.auth);
-
+  const [loading,setLoading]=useState(true);
   const [data, setData] = useState({});
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  
+
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000); // Show the splash screen for 2 seconds
+
+    return () => clearTimeout(timer);
+  }, []); 
+
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -23,12 +37,15 @@ export default function Login() {
       const response = await axios.post(
         "http://localhost:4000/api/v1/auth/login",
         data
-      );
+      );     
+     
+
 
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
-
+      
+     
       if (response.status === 200) {
         toast.success("Login Successful");
 
@@ -37,18 +54,26 @@ export default function Login() {
           ? user.image
           : `https://api.dicebear.com/5.x/initials/svg?seed=${user.fullname}%20${user.fullname}`;
         dispatch(setUser({ ...user, image: userImage }));
-        dispatch(setIsAuth(true));
+        dispatch(setIsAuth(true)); 
+        
         localStorage.setItem("token", JSON.stringify(response.data.token));
         localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("isAuth",JSON.stringify(true));
+        if(response.data.user.role==="Admin"){
+          localStorage.setItem("isAdmin", true);
+        }
         dispatch(setToken(response.data.token));
         navigate("/dashboard/home");
       }
-    } catch (error) {
-      // Handle error here, e.g., display an error message to the user
+    } catch (error) { 
+     
+        toast.error("Invalid credential");
       console.error("Error:", error);
     }
-  };
+  };   
+  if (loading) {
+    return <SplashScreen/>;
+  }
+ 
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center relative max-h-[100vh] sm:h-[100%]  ">
@@ -56,9 +81,6 @@ export default function Login() {
       <div className="bg-white shadow-md rounded-lg border-2 overflow-hidden w-full max-w-md opacity-100 z-2">
         <div className="px-6 py-8">
           <div className="flex justify-center font-black">
-            {/* <svg className="h-12 w-12 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-            </svg> */}
           </div>
           <h2 className="text-center text-3xl text-slate-950 mt-4 font-bold ">
             Placement Portal

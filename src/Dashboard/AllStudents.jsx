@@ -1,143 +1,123 @@
-import React from "react";
+import { TiUserDelete } from "react-icons/ti";
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllStudents, deleteStudent } from '../services/operations/studentsApi';
+import EnrollmentModal from './addstudentmodal/EnrollmentModal';
+import ConfirmationModal from '../components/modal/ConfirmationModal';
+import { useNavigate } from 'react-router-dom';
+import { useSpring, animated } from '@react-spring/web';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlusCircle, faUser, faEnvelope, faGraduationCap, faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 
 const AllStudents = () => {
-  // Dummy data
-  const students = [
-    {
-      initials: "SM",
-      name: "Sandeep M",
-      email: "1js15cs146@jsstateb.ac.in",
-      branch: "CSE",
-      section: "C",
-      usn: "15JSCS146",
-      cgpa: "8.5"
-    },
-    {
-      initials: "SS",
-      name: "Shithin Shetty",
-      email: "1js15cs157@jsstateb.ac.in",
-      branch: "CSE",
-      section: "C",
-      usn: "15JSCS157",
-      cgpa: "8.5"
-    },
-    {
-      initials: "UH",
-      name: "Ullas HP",
-      email: "1js15cs183@jsstateb.ac.in",
-      branch: "CSE",
-      section: "C",
-      usn: "15JSCS183",
-      cgpa: "8.5"
-    },
-    {
-      initials: "VS",
-      name: "Varun S Athreya",
-      email: "1js15cs186@jsstateb.ac.in",
-      branch: "CSE",
-      section: "C",
-      usn: "15JSCS186",
-      cgpa: "8.5"
-    }
-  ];
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { token } = useSelector(state => state.auth);
+  const students = useSelector(state => state.students.students);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [confirmationModal, setConfirmationModal] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    dispatch(getAllStudents());
+  }, [dispatch]);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleMoreInfo = (studentId) => {
+    navigate(`/dashboard/student/${studentId}`);
+  };
+
+  const headerSpring = useSpring({
+    from: { opacity: 0, transform: 'translateY(-50px)' },
+    to: { opacity: 1, transform: 'translateY(0)' },
+  });
+
+  const cardSpring = useSpring({
+    from: { opacity: 0, transform: 'translateY(50px)' },
+    to: { opacity: 1, transform: 'translateY(0)' },
+    config: { mass: 1, tension: 170, friction: 26 },
+    delay: 200,
+  });
+
+  const handleDeleteStudent = (studentId) => {
+    dispatch(deleteStudent(token, studentId, () => {
+      setConfirmationModal(null);
+      dispatch(getAllStudents());
+    }));
+  };
+
+  const filteredStudents = students.filter(student =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="container mx-auto p-4">
+      {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
+      <animated.div style={headerSpring} className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold">All Students</h1>
+        <button
+          onClick={handleOpenModal}
+          className="flex items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-lg transition-transform transform hover:scale-105"
+        >
+          <FontAwesomeIcon icon={faPlusCircle} className="mr-2" />
+          Add Student
+        </button>
+      </animated.div>
       <div className="mb-4">
-        <h1 className="text-4xl font-bold">STUDENT'S LIST</h1>
-        <nav className="text-blue-600 text-sm mt-1">Home > Students</nav>
+        <input
+          type="text"
+          placeholder="Search by student name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
-
-      <div className="bg-[#F8F8F8] p-4 rounded-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">NO. OF STUDENT'S ({students.length})</h2>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search Student"
-              className="bg-blue-900 h-10 px-4 rounded-lg text-white focus:outline-none"
-            />
-            <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-6 h-6"
+      <EnrollmentModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredStudents.map((student) => (
+          <animated.div
+            key={student._id}
+            style={cardSpring}
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+          >
+            <h2 className="text-xl font-bold mb-2">{student?.name}</h2>
+            <p><FontAwesomeIcon icon={faUser} className="mr-2" /> {student?.Enrollment}</p>
+            <p><FontAwesomeIcon icon={faEnvelope} className="mr-2" /> {student?.email}</p>
+            <p><FontAwesomeIcon icon={faGraduationCap} className="mr-2" /> {student?.additionalDetails?.branch ?? 'N/A'}</p>
+            <p><FontAwesomeIcon icon={faGraduationCap} className="mr-2" /> {student?.additionalDetails?.section ?? 'N/A'}</p>
+            <p><FontAwesomeIcon icon={faCheckCircle} className="mr-2" style={{ color: student?.additionalDetails?.eligible ? 'green' : 'gray' }} /> Eligible for Placement: {student?.additionalDetails?.eligible ? 'Yes' : 'No'}</p>
+            <p><FontAwesomeIcon icon={faTimesCircle} className="mr-2" style={{ color: student?.additionalDetails?.placed ? 'green' : 'gray' }} /> Placed: {student?.additionalDetails?.placed ? 'Yes' : 'No'}</p>
+            <div className="flex justify-between">
+              <button
+                onClick={() => handleMoreInfo(student?._id)}
+                className="mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow-lg transition-transform transform hover:scale-105"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0zm0 0l6 6"></path>
-              </svg>
-            </button>
-          </div>
-          <button className="bg-blue-900 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg flex items-center">
-            ADD NEW STUDENT
-            <span className="ml-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-6 h-6"
+                <FontAwesomeIcon icon={faPlusCircle} className="mr-2" />
+                More Info
+              </button>
+              <button
+                className="flex items-center justify-center rounded-full px-5 mt-3 text-center transition-transform transform hover:scale-105 cursor-pointer"
+                onClick={() => setConfirmationModal({
+                  text1: "Are you sure?",
+                  text2: "You want to Delete this User",
+                  btn1Text: "Delete",
+                  btn2Text: "Cancel",
+                  btn1Handler: () => handleDeleteStudent(student?._id),
+                  btn2Handler: () => setConfirmationModal(null),
+                })}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m6-6H6"></path>
-              </svg>
-            </span>
-          </button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left text-zinc-200">
-            <thead className="text-xs text-zinc-400 uppercase bg-[#F8F8F8]">
-              <tr>
-                <th scope="col" className="px-6 py-3">
-                  NAME
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  BRANCH
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  SECTION
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  USN
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  CGPA
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  MORE INFO
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student, index) => (
-                <tr key={index} className="bg-[#F8F8F8] border-b text-black ">
-                  <td className="px-6 py-4 font-medium whitespace-nowrap ">{student.initials} {student.name}</td>
-                  <td className="px-6 py-4">{student.branch}</td>
-                  <td className="px-6 py-4">{student.section}</td>
-                  <td className="px-6 py-4">{student.usn}</td>
-                  <td className="px-6 py-4">{student.cgpa}</td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="bg-[#F8F8F8] ">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="w-6 h-6"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25V9m9 0v9a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18V9m11.25 0H8.25"></path>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                <TiUserDelete size={35} className="bg-red-500 hover:bg-red-600 p-2 rounded-full" />
+              </button>
+            </div>
+          </animated.div>
+        ))}
       </div>
     </div>
   );

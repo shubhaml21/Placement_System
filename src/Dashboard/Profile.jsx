@@ -14,73 +14,72 @@ const Profile = () => {
   };
 
   return (
-    <div>
-      <div class="bg-[#F8F8F8] p-6">
-        <div class="text-3xl font-bold mb-4">STUDENT DETAILS</div>
-        <div class="text-sm mb-6">Home > Students > Student Details</div>
-        <div class="flex justify-between items-center mb-6">
-          <div class="flex items-center space-x-4">
-            {user?.image ? (
-              <div className="bg-purple-600 p-3 rounded-full text-white font-bold">
-                <img
-                  src={user?.image}
-                  alt="User"
-                  className="w-12 h-12 rounded-full"
-                />
+    <div className="p-8 bg-gray-100 min-h-screen">
+      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8">
+        <div className="text-3xl font-bold mb-6 text-gray-800">Student Details</div>
+        <div className="text-sm text-gray-600 mb-8">Home &gt; Students &gt; Student Details</div>
+        
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center space-x-4">
+            {user?.image && (
+              <div className="rounded-full overflow-hidden w-16 h-16 shadow-md">
+                <img src={user?.image} alt="User" className="w-full h-full object-cover" />
               </div>
-            ) : null}
+            )}
             <div>
-              <div class="font-bold text-lg">{user?.name}</div>
-              <div class="text-sm">{user?.Enrollment}</div>
+              <div className="text-xl font-semibold text-gray-800">{user?.name}</div>
+              <div className="text-sm text-gray-500">{user?.Enrollment}</div>
             </div>
           </div>
           <button
-            className="bg-purple-600 flex justify-center items-center gap-2 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300 ease-in-out"
+            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-full shadow hover:bg-indigo-700 transition transform hover:scale-105"
             onClick={handleEdit}
           > 
-          <FaUserEdit />
-            EDIT
+            <FaUserEdit className="text-lg" />
+            <span>EDIT</span>
           </button>
         </div>
-        <div class="mb-6">
-          <div class="text-xl font-bold mb-2">GENERAL DETAILS</div>
-          <div class="space-y-2">
-            <div class="flex justify-between">
-              <div>ENROLLMENT NUMBER</div>
-              <div>{user?.Enrollment}</div>
+        
+        <div className="mb-8">
+          <div className="text-2xl font-bold text-gray-800 mb-4">General Details</div>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center border-b pb-2">
+              <div className="text-gray-700">Enrollment Number</div>
+              <div className="text-gray-500">{user?.Enrollment}</div>
             </div>
-            <div class="flex justify-between">
-              <div>EMAIL</div>
-              <div>{user?.email}</div>
+            <div className="flex justify-between items-center border-b pb-2">
+              <div className="text-gray-700">Email</div>
+              <div className="text-gray-500">{user?.email}</div>
             </div>
-            <div class="flex justify-between">
-              <div>BRANCH & SECTION</div>
-              <div>{user?.additionalDetails?.branch || "N/A"}</div>
+            <div className="flex justify-between items-center border-b pb-2">
+              <div className="text-gray-700">Branch & Section</div>
+              <div className="text-gray-500">{user?.additionalDetails?.branch || "N/A"}</div>
             </div>
-            <div class="flex justify-between">
-              <div>YEAR</div>
-              <div>{user?.additionalDetails?.year || "N/A"}</div>
+            <div className="flex justify-between items-center border-b pb-2">
+              <div className="text-gray-700">Year</div>
+              <div className="text-gray-500">{user?.additionalDetails?.year || "N/A"}</div>
             </div>
           </div>
         </div>
+        
         <div>
-          <div class="text-xl font-bold mb-2">ACADEMIC DETAILS</div>
-          <div class="space-y-2">
-            <div class="flex justify-between">
-              <div>CGPA</div>
-              <div>{user?.additionalDetails?.CGPA || "N/A"}</div>
+          <div className="text-2xl font-bold text-gray-800 mb-4">Academic Details</div>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center border-b pb-2">
+              <div className="text-gray-700">CGPA</div>
+              <div className="text-gray-500">{user?.additionalDetails?.CGPA || "N/A"}</div>
             </div>
-            <div class="flex justify-between">
-              <div>10TH MARK'S PERCENTAGE</div>
-              <div>{user?.additionalDetails?.tenth || "N/A"}</div>
+            <div className="flex justify-between items-center border-b pb-2">
+              <div className="text-gray-700">10th Mark's Percentage</div>
+              <div className="text-gray-500">{user?.additionalDetails?.tenth || "N/A"}</div>
             </div>
-            <div class="flex justify-between">
-              <div>12TH MARK'S PERCENTAGE</div>
-              <div>{user?.additionalDetails?.twelth || "N/A"}</div>
+            <div className="flex justify-between items-center border-b pb-2">
+              <div className="text-gray-700">12th Mark's Percentage</div>
+              <div className="text-gray-500">{user?.additionalDetails?.twelth || "N/A"}</div>
             </div>
-            <div class="flex justify-between">
-              <div>BACKLOGS</div>
-              <div>{user?.additionalDetails?.backlog || "N/A"}</div>
+            <div className="flex justify-between items-center border-b pb-2">
+              <div className="text-gray-700">Backlogs</div>
+              <div className="text-gray-500">{user?.additionalDetails?.backlog || "N/A"}</div>
             </div>
           </div>
         </div>

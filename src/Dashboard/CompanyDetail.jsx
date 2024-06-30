@@ -1,57 +1,81 @@
-import { AiOutlineClose } from "react-icons/ai"; 
-import { IoClose } from "react-icons/io"; 
-import { AiOutlinePlus } from "react-icons/ai"; 
-import React from "react";
-import { useState } from "react";
+import { AiOutlineInfoCircle, AiOutlinePlus } from "react-icons/ai";
+import { TbTrash, TbEdit } from "react-icons/tb";
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Button,
+  Typography,
+  Modal,
+  TextField,
+  Select,
+  MenuItem,
+  TablePagination,
+} from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import ConfirmationModal from "../components/modal/ConfirmationModal";
+import {
+  addCompany,
+  deleteCompany,
+  getAllCompanies,
+  editCompany,
+} from "../services/operations/companyApi";
+import { Link, useParams } from "react-router-dom";
 
 const CompanyDetail = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const dummyData = [
-    {
-      name: "Amazon",
-      type: "PRODUCT",
-      date: "18 Jun 2023",
-      ctc: "1000000000",
-      year: "2023",
-    },
-    {
-      name: "Google",
-      type: "PRODUCT",
-      date: "13 Jan 2022",
-      ctc: "100000",
-      year: "2023",
-    },
-    {
-      name: "Infosys",
-      type: "SERVICE",
-      date: "02 Feb 2022",
-      ctc: "70000",
-      year: "2023",
-    },
-  ];
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [editMode, setEditMode] = useState(false);
+  const [currentCompanyId, setCurrentCompanyId] = useState(null);
 
-  // Function to open the modal
-  const openModal = () => {
-    setIsModalOpen(true);
+  const { token } = useSelector((state) => state.auth);
+  const { companies } = useSelector((state) => state.company);
+  const dispatch = useDispatch();
+  const { companyId } = useParams();
+
+  const [open, setOpen] = useState(false);
+  const [confirmationModal, setConfirmationModal] = useState(null);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
+    setEditMode(false);
+    setFormData({
+      companyName: "",
+      companyDescription: "",
+      companyWebsiteURL: "",
+      arrival_date: "",
+      packageAmount: "",
+      year: "",
+      companyType: "",
+    });
   };
 
-  // Function to close the modal
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 500,
+    bgcolor: "background.paper",
+    border: "1px solid black",
+    boxShadow: 24,
+    p: 2,
+    fontSize: "0.9rem",
   };
+
+  useEffect(() => {
+    if (token) {
+      dispatch(getAllCompanies(token));
+    }
+  }, [dispatch, token]);
 
   const [formData, setFormData] = useState({
     companyName: "",
     companyDescription: "",
-    companyLogoURL: "",
-    companyWebsiteURL: "",
-    arrivalDate: "",
-    packageValue: "",
+    companyWebsite: "",
+    arrival_date: "",
+    packageAmount: "",
     year: "",
-    cgpaEligibility: "",
-    tenthPercentageEligibility: "",
-    twelthPercentageEligibility: "",
-    backlogs: "",
+    companyType: "",
   });
 
   const handleChange = (e) => {
@@ -61,19 +85,61 @@ const CompanyDetail = () => {
       [name]: value,
     });
   };
-  
-  const handleAddCompany = (e) => {
-    // Make API call with formData
-    e.preventDefault();
-    console.log(formData);
-    // Clear input fields if needed
-    closeModal();
+
+  const handleAddCompany = () => {
+    try {
+      if (editMode) {
+        dispatch(editCompany(token, currentCompanyId, formData));
+      } else {
+        dispatch(addCompany(token, formData));
+      }
+    } catch (err) {
+      console.log("ERROR MESSAGE - ", err.message);
+    }
+    handleClose();
   };
 
+  const handleEditButtonClick = (company) => {
+    setEditMode(true);
+    setCurrentCompanyId(company._id);
+    setFormData({
+      companyName: company.companyName,
+      companyDescription: company.companyDescription,
+      companyWebsite: company.companyWebsite,
+      arrival_date: company.arrival_date,
+      packageAmount: company.packageAmount,
+      year: company.year,
+      companyType: company.companyType,
+    });
+    handleOpen();
+  };
+
+  const handleDelete = (id) => {
+    try {
+      dispatch(deleteCompany(token, id));
+    } catch (err) {
+      console.log("ERROR MESSAGE - ", err.message);
+    }
+    setConfirmationModal(null);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const displayCompanies = Array.isArray(companies)
+    ? companies.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+    : [];
+
   return (
-    <div className="bg-[#F8F8F8] text-white p-8">
+    <div className="bg-gray-100 text-gray-900 p-8">
       <div className="mb-4">
-        <h1 className="text-4xl font-bold uppercase tracking-widest text-[#333333] mb-2">
+        <h1 className="text-4xl font-bold uppercase tracking-widest text-gray-700 mb-2">
           Company's List
         </h1>
         <nav aria-label="breadcrumb">
@@ -81,16 +147,16 @@ const CompanyDetail = () => {
             <li className="flex items-center">
               <a
                 href="/dashboard/home"
-                className="text-black hover:text-neutral-500"
+                className="text-gray-700 hover:text-gray-500"
               >
                 Dashboard
               </a>
-              <span className="mx-2 text-black">/</span>
+              <span className="mx-2 text-gray-700">/</span>
             </li>
             <li className="flex items-center">
               <a
                 href="/dashboard/company"
-                className="text-black hover:text-neutral-500"
+                className="text-gray-700 hover:text-gray-500"
               >
                 Companies
               </a>
@@ -98,216 +164,175 @@ const CompanyDetail = () => {
           </ol>
         </nav>
       </div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-[#333333]">
-          No. of Companies (4)
+      <div className="mb-6 flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-700">
+          No. of Companies ({Array.isArray(companies) ? companies.length : 0})
         </h2>
-      </div>
-      <div className="mb-6">
         <button
-          onClick={openModal}
-          className="bg-[#004085]  gap-2 hover:bg-[#0077B6] text-white py-2 px-4 rounded inline-flex items-center"
+          onClick={handleOpen}
+          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded inline-flex items-center"
         >
+          <AiOutlinePlus className="mr-2" />
           Add New Company
-          <AiOutlinePlus />
         </button>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-[#004085]">
-              <th className="text-white py-2 px-2">Name</th>
-              <th className="text-white py-2 px-2">Type</th>
-              <th className="text-white py-2 px-2">Date of Arrival</th>
-              <th className="text-white py-2 px-2">CTC</th>
-              <th className="text-white py-2 px-2">Year</th>
-              <th className="text-white py-2 px-2">More Info</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dummyData.map((item, index) => (
-              <tr key={index} className="bg-[#F8F8F8]">
-                <td className="py-2 px-4 text-[#333333] ">{item.name}</td>
-                <td className="py-2 px-4 text-[#333333] ">{item.type}</td>
-                <td className="py-2 px-4 text-[#333333] ">{item.date}</td>
-                <td className="py-2 px-4 text-[#333333] ">{item.ctc}</td>
-                <td className="py-2 px-4 text-[#333333] ">{item.year}</td>
-                <td className="py-2 px-4">
-                  <button className="bg-blue-900 hover:bg-blue-700 text-white p-2 rounded-full">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 16v-4m0 0h.01m-6 0h12M12 8h.01" />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* chatgpt modal  */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="relative bg-white rounded-lg px-4 pt-5 pb-4 overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full">
-            <div className="absolute top-0 right-0 pt-2 pr-2">
-              <button
-                type="button"
-                onClick={closeModal}
-                className="text-gray-400 hover:text-gray-500 focus:outline-none focus:text-gray-500 transition ease-in-out duration-150"
-              >
-                <span className="sr-only">Close</span>
-                <AiOutlineClose />
-              </button>
-            </div>
-            <div className="text-left sm:flex sm:items-start">
-              <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">
-                  Add Company
-                </h3>
-                <div className="mt-5">
-                  <div className="flex flex-col space-y-4 text-black ">
-                    <input
-                      type="text"
-                      value={formData.companyName}
-                      onChange={handleChange}
-                      className="border rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 text-black"
-                      placeholder="Company Name"
-                    />
-                    <input
-                      type="text"
-                      value={formData.companyDescription}
-                      onChange={handleChange}
-                      className="border rounded-md px-3 py-2 focus:outline-none focus:border-blue-500"
-                      placeholder="Company Description"
-                    />
-                    <input
-                      type="text"
-                      onChange={handleChange}
-                      value={formData.companyLogoURL}
-                      className="border rounded-md px-3 py-2 focus:outline-none focus:border-blue-500"
-                      placeholder="Company Logo URL"
-                    />
-                    <input
-                      type="text"
-                      onChange={handleChange}
-                      value={formData.companyWebsiteURL}
-                      className="border rounded-md px-3 py-2 focus:outline-none focus:border-blue-500"
-                      placeholder="Company Website URL"
-                    />
-                    <input
-                      type="date"
-                      onChange={handleChange}
-                      value={formData.arrivalDate}
-                      className="border rounded-md px-3 py-2 focus:outline-none focus:border-blue-500"
-                      placeholder="Arrival Date"
-                    />
-                    <input
-                      type="text"
-                      onChange={handleChange}
-                      value={formData.packageValue}
-                      className="border rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 text-black"
-                      placeholder="Package"
-                    />
-                    <input
-                      type="text"
-                      onChange={handleChange}
-                      value={formData.year}
-                      className="border rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 text-black"
-                      placeholder="Year"
-                    />
-                    {/* <div className="flex flex-col gap-2">
-                      <label
-                        htmlFor="eligibility"
-                        className="text-sm font-medium text-gray-700"
-                      >
-                        Eligibility
-                      </label>
-                      <select
-                        id="cgpaEligibility"
-                        name="cgpaEligibility"
-                        value={formData.cgpaEligibility}
-                        onChange={handleChange}
-                        className="border rounded-md px-3 py-2 focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="" defaultValue={""}>
-                          Select CGPA
-                        </option>
-                        <option value="above-7">Above-7</option>
-                        <option value="above-8">Above-8</option>
-                        <option value="above-9">Above-9</option>
-                      </select>
-                      <select
-                        id="tenthPercentageEligibility"
-                        name="tenthPercentageEligibility"
-                        onChange={handleChange}
-                        value={formData.tenthPercentageEligibility}
-                        className="border rounded-md px-3 py-2 focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="" defaultValue={""}>
-                          Select Tenth Percentage
-                        </option>
-                        <option value="above-70">Above-70</option>
-                        <option value="above-80">Above-80</option>
-                        <option value="above-90">Above-90</option>
-                      </select>
-                      <select
-                        id="twelthPercentageEligibility"
-                        name="twelthPercentageEligibility"
-                        value={formData.twelthPercentageEligibility}
-                        onChange={handleChange}
-                        className="border rounded-md px-3 py-2 focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="" defaultValue={""}>
-                          Select Twelth Percentage
-                        </option>
-                        <option value="above-70">Above-70</option>
-                        <option value="above-80">Above-80</option>
-                        <option value="above-90">Above-90</option>
-                      </select>
-                      <select
-                        id="backlogs"
-                        name="backlogs"
-                        onChange={handleChange}
-                        value={formData.backlogs}
-                        className="border rounded-md px-3 py-2 focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="" defaultValue={""}>
-                          Select Backlogs
-                        </option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                      </select>
-                    </div> */}
-                  </div>
-                </div>
-                <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                  <button
-                    type="button"
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-600 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-500 transition ease-in-out duration-150 sm:ml-3 sm:w-auto sm:text-sm"
-                    onClick={handleAddCompany}
-                  >
-                    Add
-                  </button>
-                  <button
-                    type="button"
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:border-blue-300 focus:ring focus:ring-blue-200 transition ease-in-out duration-150 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                    onClick={closeModal}
-                  >
-                    Cancel
-                  </button>
-                </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {displayCompanies.map((item, index) => (
+          <div
+            key={index}
+            className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+          >
+            <div className="flex justify-between items-center mb-2">
+              <Typography variant="h6" className="font-semibold">
+                {item.companyName}
+              </Typography>
+              <div className="flex gap-2">
+                <button onClick={() => handleEditButtonClick(item)}>
+                  <TbEdit fontSize={25} className="text-gray-700 hover:text-gray-500" />
+                </button>
+                <button
+                  onClick={() =>
+                    setConfirmationModal({
+                      text1: "Are you sure?",
+                      text2: "You want to delete this company",
+                      btn1Text: "Delete",
+                      btn2Text: "Cancel",
+                      btn1Handler: () => handleDelete(item._id),
+                      btn2Handler: () => setConfirmationModal(null),
+                    })
+                  }
+                >
+                  <TbTrash fontSize={25} className="text-gray-700 hover:text-gray-500" />
+                </button>
               </div>
             </div>
+            <Typography variant="body2" className="mb-2">
+              Type: {item.companyType}
+            </Typography>
+            <Typography variant="body2" className="mb-2">
+              Arrival Date: {item.arrival_date}
+            </Typography>
+            <Typography variant="body2" className="mb-2">
+              CTC: {item.packageAmount}
+            </Typography>
+            <Typography variant="body2" className="mb-2">
+              Year: {item.year}
+            </Typography>
+            <div className="flex justify-end mt-4">
+              <Link to={`/dashboard/companyinfo/${item._id}`}>
+                <button className="text-blue-600 hover:text-blue-800">
+                  <AiOutlineInfoCircle fontSize={25} />
+                </button>
+              </Link>
+            </div>
           </div>
-        </div>
+        ))}
+      </div>
+      {confirmationModal && (
+        <ConfirmationModal modalData={confirmationModal} />
+      )}
+      <TablePagination
+        component="div"
+        count={Array.isArray(companies) ? companies.length : 0}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[6, 12, 24]}
+        className="mt-4"
+      />
+      {open && (
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+          className="flex items-center justify-center bg-black bg-opacity-50"
+        >
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-4">
+            <h2
+              id="modal-modal-title"
+              className="text-2xl font-semibold mb-4 text-center"
+            >
+              {editMode ? "Edit Company" : "Add Company"}
+            </h2>
+            <div className="space-y-2">
+              <TextField
+                label="Company Name"
+                name="companyName"
+                value={formData.companyName}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+              />
+              <TextField
+                label="Company Description"
+                name="companyDescription"
+                value={formData.companyDescription}
+                onChange={handleChange}
+                fullWidth
+                multiline
+                rows={1}
+                variant="outlined"
+              />
+              <TextField
+                label="Company Website"
+                name="companyWebsite"
+                value={formData.companyWebsite}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+              />
+              <TextField
+                label="Arrival Date"
+                name="arrival_date"
+                value={formData.arrival_date}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+                type="date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+              <TextField
+                label="CTC (Package Amount)"
+                name="packageAmount"
+                value={formData.packageAmount}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+              />
+              <TextField
+                label="Year"
+                name="year"
+                value={formData.year}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+              />
+              <Select
+                label="Company Type"
+                name="companyType"
+                value={formData.companyType}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+              >
+                <MenuItem value="Technical">Technical</MenuItem>
+                <MenuItem value="Non-Technical">Non-Technical</MenuItem>
+              </Select>
+            </div>
+            <div className="mt-6 flex justify-end space-x-4">
+              <Button onClick={handleClose} variant="outlined" color="secondary">
+                Cancel
+              </Button>
+              <Button onClick={handleAddCompany} variant="contained" color="primary">
+                {editMode ? "Save Changes" : "Add Company"}
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

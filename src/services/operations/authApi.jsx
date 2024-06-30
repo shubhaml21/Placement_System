@@ -10,6 +10,10 @@ export function logout(navigate) {
       dispatch(setUser(null))
       localStorage.removeItem("token")
       localStorage.removeItem("user")
+      localStorage.removeItem("isAdmin")
+    
+      // localStorage.removeItem("companies")
+     
       toast.success("Logged Out")
       navigate("/")
     }

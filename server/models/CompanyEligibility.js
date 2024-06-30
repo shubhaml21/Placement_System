@@ -5,19 +5,20 @@ const mongoose = require("mongoose");
 const companyEligiblitySchema = new mongoose.Schema({
   CGPA: {
     type: Number,
-    required: true,
+    // required: true,
   },
   backlogs: {
     type: Number,
-    required: true,
+    // required: true,
   },
   tenth: {
     type: Number,
-    required: true,
-  },
+    // required: true,
+  }, 
+  
   twelth: {
     type: Number,
-    required: true,
+    // required: true,
   },
 });
 

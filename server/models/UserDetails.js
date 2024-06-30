@@ -15,11 +15,11 @@ const profileSchema = new mongoose.Schema({
   },
   eligible: {
     type: Boolean,
-    default: false,
+    
   },
   placed: {
     type: Boolean,
-    default: false,
+ 
   },
   CGPA: {
     type: Number,
