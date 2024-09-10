@@ -23,7 +23,7 @@ import { Link, useParams } from "react-router-dom";
 
 const CompanyDetail = () => {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
   const [editMode, setEditMode] = useState(false);
   const [currentCompanyId, setCurrentCompanyId] = useState(null);
 

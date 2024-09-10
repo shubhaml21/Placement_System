@@ -1,4 +1,5 @@
 const mongoose=require("mongoose");
+const bcrypt = require('bcrypt');
 const User = require("../models/User");
 const UserDetails = require("../models/UserDetails"); 
 const Company=require("../models/Company");
@@ -172,15 +173,6 @@ exports.addStudent = async (req, res) => {
       });
     }
 
-    // Validate email format
-    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // if (!emailRegex.test(email)) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Invalid email format"
-    //   });
-    // }
-
     // Validate numeric fields
     if (
       isNaN(CGPA) ||
@@ -190,7 +182,7 @@ exports.addStudent = async (req, res) => {
     ){
       return res.status(400).json({
         success: false,
-        message: "Year, CGPA, Backlog, Tenth, Twelth and Package should be numeric"
+        message: "Year, CGPA, Backlog, Tenth, Twelth should be numeric"
       });
     }
 
@@ -203,13 +195,17 @@ exports.addStudent = async (req, res) => {
       });
     }
 
+    // Hash the password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash('password@123', saltRounds);
+
     // Create user
     const user = new User({
       name,
       email,
       Enrollment,
-      password: 'defaultPassword123', // Assuming password is provided or defaulted. Change this as needed.
-      role: "User", // Assuming default role is "User".
+      password: hashedPassword, // Use the hashed password
+      role: "User", // Default role
     });
 
     // Save user to get the _id for reference
@@ -233,8 +229,7 @@ exports.addStudent = async (req, res) => {
 
     // Link userDetails to the user
     user.additionalDetails = savedDetails._id;
-    (await user.save()).populate("additionalDetails")
-
+    await user.save();
 
     // Respond with success
     return res.status(201).json({
